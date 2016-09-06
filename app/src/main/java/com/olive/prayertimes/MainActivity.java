@@ -284,5 +284,4 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

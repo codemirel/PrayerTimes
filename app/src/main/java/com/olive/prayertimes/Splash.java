@@ -1,12 +1,13 @@
 package com.olive.prayertimes;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
-public class Splash extends AppCompatActivity {
+public class Splash extends Activity {
 
     private static final String PREFS_NAME = "MyPrefsFile";
 
@@ -14,8 +15,9 @@ public class Splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
+        Log.d("Girdi", "checkFirstTime basladi");
         checkFirstTime();
+        Log.d("Girdi", "checkFirstTime bitti");
 
     }
 
@@ -27,6 +29,7 @@ public class Splash extends AppCompatActivity {
             Intent first_time_act = new Intent(this, IlkKurulum.class);
             startActivity(first_time_act);
             finish();
+
         } else{
             Intent mainAct = new Intent(this, MainActivity.class);
             startActivity(mainAct);

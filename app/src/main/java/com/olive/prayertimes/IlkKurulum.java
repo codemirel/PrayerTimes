@@ -2,8 +2,10 @@ package com.olive.prayertimes;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -56,7 +58,6 @@ public class IlkKurulum extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         initialize();
         //SaveData.clearFile(getApplicationContext());
 
@@ -79,6 +80,7 @@ public class IlkKurulum extends AppCompatActivity {
             }
         });
 
+        final String[] selectedUlke = {null};
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -86,29 +88,23 @@ public class IlkKurulum extends AppCompatActivity {
                 List<Map.Entry<String, Integer>> useList = null;
                 String region = null;
                 String selected = (String) lv.getItemAtPosition(position);
-                Log.d("onClickListener", selected + " is selected");
 
-                //bana ses gelmiyot benimki de gitmiyor galiba
                 switch (parameters.size()) {
                     case 0: {
+                        selectedUlke[0] = selected;
                         useList = temp;
                         region = "Country";
                         if (selected.equals("ABD") || selected.equals("TÜRKİYE") || selected.equals("KANADA")) {
                             secilenUlke = true;
+
                         } else {
                             secilenUlke = false;
                         }
-                        Log.d("onClickListener", Boolean.toString(secilenUlke));
-                        break;
                     }
                     case 1: {
                         useList = temp;
                         region = "State";
                         if (!secilenUlke) {
-                            /*AlertDialog.Builder dlgAlert = new AlertDialog.Builder(IlkKurulum.this);
-                            dlgAlert.setMessage(selected);
-                            dlgAlert.setTitle("About Olive");
-                            dlgAlert.create().show();*/
                             settings.edit().putBoolean(selected, true);
                         }
                         break;
@@ -117,17 +113,12 @@ public class IlkKurulum extends AppCompatActivity {
                         useList = temp;
                         region = "District";
                         if (secilenUlke) {
-                            /*AlertDialog.Builder dlgAlert = new AlertDialog.Builder(IlkKurulum.this);
-                            dlgAlert.setMessage(selected);
-                            dlgAlert.setTitle("About Olive");
-                            dlgAlert.create().show();*/
                             settings.edit().putBoolean(selected, true);
                         }
                         break;
                     }
 
                 }
-
                 for (Map.Entry<String, Integer> entr : temp) {
                     if (selected.equals(entr.getKey())) {
                         parameters.add(new AbstractMap.SimpleEntry<String, String>(region, Integer.toString(entr.getValue())));
@@ -135,18 +126,44 @@ public class IlkKurulum extends AppCompatActivity {
                         break;
                     }
                 }
+
+                switch (parameters.size()) {
+                    case 0: {
+                        if (selected.equals("ABD") || selected.equals("TÜRKİYE") || selected.equals("KANADA")) {
+                            secilenUlke = true;
+                            if (selected.equals("ABD") || selected.equals("KANADA"))
+                                setTitle("Eyalet Seçiniz");
+                            else
+                                setTitle("Şehir Seçiniz");
+                        } else {
+                            secilenUlke = false;
+                        }
+                    }
+                    case 1: {
+                        if (!secilenUlke) {
+                            setTitle("Şehir Seçiniz");
+                        } else {
+                            if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("KANADA"))
+                                setTitle("Şehir Seçiniz");
+                            else
+                                setTitle("İlçe Seçiniz");
+                        }
+                        break;
+                    }
+
+                }
+
             }
         });
     }
 
     private void fillListView(List<String> list) {
-
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, list) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                text1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 23);
+                text1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
                 return view;
             }
         };
@@ -157,12 +174,13 @@ public class IlkKurulum extends AppCompatActivity {
     private List<String> convertMap2List(List<Map.Entry<String, Integer>> param) {
         List<String> backList = new ArrayList<>();
         for (int i = 0; i < param.size(); i++) {
-            backList.add(param.get(i).getKey().toString());
+            String s = param.get(i).getKey().toString();
+            backList.add(s);
         }
         return backList;
     }
 
-    private String getCountryNameByValue(String value){
+    private String getCountryNameByValue(String value) {
         for (Map.Entry<String, Integer> entr : countries_list) {
             if (Integer.parseInt(value) == entr.getValue()) {
                 return entr.getKey().toString();
@@ -171,7 +189,7 @@ public class IlkKurulum extends AppCompatActivity {
         return null;
     }
 
-    private String getStateNameByValue(String value){
+    private String getStateNameByValue(String value) {
         for (Map.Entry<String, Integer> entr : states_list) {
             if (Integer.parseInt(value) == entr.getValue()) {
                 return entr.getKey().toString();
@@ -180,8 +198,8 @@ public class IlkKurulum extends AppCompatActivity {
         return null;
     }
 
-    private String getDistrictNameByValue(String value){
-        if(value != null){
+    private String getDistrictNameByValue(String value) {
+        if (value != null) {
             for (Map.Entry<String, Integer> entr : districts_list) {
                 if (Integer.parseInt(value) == entr.getValue()) {
                     return entr.getKey().toString();
@@ -208,10 +226,10 @@ public class IlkKurulum extends AppCompatActivity {
                 Log.d("doInBackground", "call for getStates");
                 return getStates(params[0].get(0).getValue().toString());
             } else if (params[0].size() == 2) {
-                if(secilenUlke){
+                if (secilenUlke) {
                     Log.d("doInBackground", "call for getDistricts");
                     return getDictricts(params[0].get(0).getValue().toString(), params[0].get(1).getValue().toString());
-                } else{
+                } else {
                     Log.d("doInBackground", "call for getPrayerTimes");
                     getPrayerTimes(params[0].get(0).getValue().toString(), params[0].get(1).getValue().toString(), null);
                 }
@@ -237,12 +255,12 @@ public class IlkKurulum extends AppCompatActivity {
                 activity.temp = list;
                 activity.fillListView(activity.convertMap2List(list));
             } else if (activity.parameters.size() == 2) {
-                if(secilenUlke){
+                if (secilenUlke) {
                     Log.d("onPostExecute", "Districts are listing..");
                     activity.districts_list = list;
                     activity.temp = list;
                     activity.fillListView(activity.convertMap2List(list));
-                } else{
+                } else {
                     Log.d("onPostExecute", "Times received..");
                     //System.out.println(SaveData.readFromFile(getApplicationContext()));
                     Intent mainAct = new Intent(IlkKurulum.this, MainActivity.class);
@@ -272,7 +290,7 @@ public class IlkKurulum extends AppCompatActivity {
                         //.data("City", Integer.toString(9676))
                         //.data("period", "Haftalik")
                         .userAgent("Mozilla")
-                        .timeout(10*1000)
+                        .timeout(10 * 1000)
                         .post();
 
 
@@ -302,7 +320,7 @@ public class IlkKurulum extends AppCompatActivity {
                         //.data("City", Integer.toString(9676))
                         //.data("period", "Haftalik")
                         .userAgent("Mozilla")
-                        .timeout(10*1000)
+                        .timeout(10 * 1000)
                         .post();
 
         /*for(Element sp : doc.select("span"))
@@ -336,7 +354,7 @@ public class IlkKurulum extends AppCompatActivity {
                         //.data("City", Integer.toString(9676))
                         //.data("period", "Haftalik")
                         .userAgent("Mozilla")
-                        .timeout(10*1000)
+                        .timeout(10 * 1000)
                         .post();
 
         /*for(Element sp : doc.select("span"))
@@ -365,40 +383,40 @@ public class IlkKurulum extends AppCompatActivity {
             List<List<String>> listOfList = new ArrayList<>();
             try {
 
-                if(district_value == null){
+                if (district_value == null) {
                     doc = Jsoup.connect(url)
                             .data("Country", country_value)
                             .data("State", state_value)
                             .data("period", period_value)
                             .userAgent("Mozilla")
-                            .timeout(10*1000)
+                            .timeout(10 * 1000)
                             .post();
-                } else{
+                } else {
                     doc = Jsoup.connect(url)
                             .data("Country", country_value)
                             .data("State", state_value)
                             .data("City", district_value)
                             .data("period", period_value)
                             .userAgent("Mozilla")
-                            .timeout(10*1000)
+                            .timeout(10 * 1000)
                             .post();
                 }
 
                 SaveData.clearFile(getApplicationContext());
 
                 List<String> gun;
-                for(Element tr : doc.select("tbody").first().children()){
+                for (Element tr : doc.select("tbody").first().children()) {
                     gun = new ArrayList<>();
-                    for(Element td : tr.select("td")){
-                        if(td.text() != "")
+                    for (Element td : tr.select("td")) {
+                        if (td.text() != "")
                             gun.add(td.text());
                     }
                     listOfList.add(gun);
                 }
 
-                for(List<String> l : listOfList){
-                    if(l.size() != 0){
-                        for(String s : l){
+                for (List<String> l : listOfList) {
+                    if (l.size() != 0) {
+                        for (String s : l) {
                             //System.out.println(s);
                             SaveData.writeToFile(getApplicationContext(), s + "\n");
                         }
@@ -420,7 +438,7 @@ public class IlkKurulum extends AppCompatActivity {
 
     }
 
-    private void initialize(){
+    private void initialize() {
         lv = (ListView) findViewById(R.id.listView);
         searchTextBox = (EditText) findViewById(R.id.searchText);
         countries_list = new ArrayList<>();
