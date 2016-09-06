@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             ulkeSehirIlce += times.get(times.size() - 3) + "/";
         ulkeSehirIlce += times.get(times.size() - 2) + "/" + times.get(times.size() - 1);
         arr_tv_map[12].setText(ulkeSehirIlce);
-        calcDiffInTime();
+        int curV = calcDiffInTime();
 
     }
 
