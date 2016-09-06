@@ -52,21 +52,19 @@ public class MainActivity extends AppCompatActivity {
         for(int i=1;i<=6;i++){
             arr_tv_map[2*(i-1)+1].setText(times.get(i));
         }
-        arr_tv_map[14].setText(getCurrentTime());
         arr_tv_map[16].setText(getCurrentDate());
         String ulkeSehirIlce = "";
         if(times.get(times.size() - 3) != null)
             ulkeSehirIlce += times.get(times.size() - 3) + "/";
         ulkeSehirIlce += times.get(times.size() - 2) + "/" + times.get(times.size() - 1);
         arr_tv_map[12].setText(ulkeSehirIlce);
-        System.out.println(ulkeSehirIlce);
-        //findDiffInTime();
+        calcDiffInTime();
 
     }
 
     private String getCurrentTime(){
 
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
         return timeFormat.format(currentMoment.getTime());
 
     }
@@ -76,22 +74,28 @@ public class MainActivity extends AppCompatActivity {
         return dateFormat.format(currentMoment.getTime());
     }
 
-    private void findDiffInTime(){
+    private int calcDiffInTime(){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         try {
             Date date2 = simpleDateFormat.parse(getCurrentTime());
             for(int i = 1; i <= 6; i++){
                 Date date1 = simpleDateFormat.parse(times.get(i));
-                System.out.println(date2.getTime() + " <-> " + date1.getTime());
-                long difference = date2.getTime() - date1.getTime();
-                int days = (int) (difference / (1000*60*60*24));
-                int hours = (int) ((difference - (1000*60*60*24*days)) / (1000*60*60));
-                int min = (int) (difference - (1000*60*60*24*days) - (1000*60*60*hours)) / (1000*60);
-                System.out.println(Integer.toString(days) + ", " + Integer.toString(hours) + ", " + Integer.toString(min));
+                long diff = date2.getTime() - date1.getTime();
+                if(diff < 0){
+                    int days = (int) (diff / (1000*60*60*24));
+                    int hours = (int) ((diff - (1000*60*60*24*days)) / (1000*60*60));
+                    int minutes = (int) (diff - (1000*60*60*24*days) - (1000*60*60*hours)) / (1000*60);
+                    arr_tv_map[15].setText(Math.abs(hours) + ":" + Math.abs(minutes));
+                    return i;
+                }
             }
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        return -1;
+
     }
 
 
