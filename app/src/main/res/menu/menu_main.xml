@@ -1,0 +1,28 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.olive.prayertimes.MainActivity">
+
+    <item
+        android:id="@+id/action_kible"
+        android:icon="@drawable/ic_action_kible"
+        android:orderInCategory="102"
+        android:title="@string/app_name"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_konum"
+        android:icon="@drawable/ic_action_location"
+        android:orderInCategory="103"
+        android:title="@string/app_name"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="104"
+        android:title="@string/app_name"
+        app:showAsAction="always" />
+
+
+</menu>

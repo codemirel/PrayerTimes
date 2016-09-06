@@ -1,0 +1,12 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="asagiGostergeFontSize">24sp</dimen>
+    <dimen name="ulkeSehirFont">20sp</dimen>
+    <dimen name="GeriyeKalanFontSize">40sp</dimen>
+    <dimen name="currentVakitFontSize">20sp</dimen>
+    <dimen name="currentKalanFontSize">17sp</dimen>
+    <dimen name="altGostPadL">00dp</dimen>
+    <dimen name="altGostPadR">00dp</dimen>
+    <dimen name="altGostPadT">20dp</dimen>
+    <dimen name="kalanVakitMarginD">15dp</dimen>
+</resources>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.olive.prayertimes.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <LinearLayout
+        android:id="@+id/gostergeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/ayrim"
+        android:elevation="12dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/currentVakit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Sabah"
+            android:textColor="#455A64"
+            android:textSize="@dimen/currentVakitFontSize" />
+
+        <TextView
+            android:id="@+id/nextVakit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="05:32"
+            android:textColor="#455A64"
+            android:textSize="@dimen/GeriyeKalanFontSize" />
+
+        <TextView
+            android:id="@+id/kalanVakit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/kalanVakitMarginD"
+            android:text="00:05:12"
+            android:textColor="#455A64"
+            android:textSize="@dimen/currentKalanFontSize" />
+
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/gostergeLayout"
+        android:background="@color/kalanVakitColor"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/altGostPadL"
+        android:paddingRight="@dimen/altGostPadR"
+        android:paddingTop="@dimen/altGostPadT">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/ic_action_left" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_action_right" />
+
+        <LinearLayout
+            android:id="@+id/sabahLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:elevation="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/sabahSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|start"
+                android:text="Sabah:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/sabahSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|end"
+                android:text="05:12"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/gunesLay"
+            android:layout_below="@+id/sabahLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:background="@color/ayrim"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/gunesSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|start"
+                android:text="Güneş:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/gunesSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|end"
+                android:text="06:36"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ogleLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/gunesLay"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/ogleSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|start"
+                android:text="Öğle:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/ogleSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+
+                android:gravity="center|end"
+                android:text="12:59"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ikindiLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ogleLay"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/ikindiSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|start"
+                android:text="İkindi:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/ikindiSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|end"
+                android:text="16:32"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/aksamLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ikindiLay"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/aksamSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|start"
+                android:text="Akşam:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/aksamSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|end"
+                android:text="20:13"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/yatsiLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/aksamLay"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/yatsiSol"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|start"
+                android:text="Yatsı:"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+
+            <TextView
+                android:id="@+id/yatsiSag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:gravity="center|end"
+                android:text="21:22"
+                android:textColor="#000000"
+                android:textSize="@dimen/asagiGostergeFontSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ulkeSehir"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/yatsiLay"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sehirText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:gravity="center|top"
+                android:text="CHICAGO/ABD"
+                android:textColor="#000000"
+                android:textSize="@dimen/ulkeSehirFont" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tarihLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/ulkeSehir"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tarihText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:gravity="center|top"
+                android:text="3 Eylül 2016 Cumartesi"
+                android:textColor="#000000"
+                android:textSize="@dimen/ulkeSehirFont" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
