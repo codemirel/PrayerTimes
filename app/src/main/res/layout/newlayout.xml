@@ -21,7 +21,7 @@
             android:id="@+id/currentVakit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/kalanVakitMarginD"
             android:text="Sabah"
             android:textColor="#455A64"
             android:textSize="@dimen/currentVakitFontSize" />
@@ -31,18 +31,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_marginBottom="@dimen/kalanVakitMarginD"
             android:text="05:32"
             android:textColor="#455A64"
             android:textSize="@dimen/GeriyeKalanFontSize" />
-
-        <TextView
-            android:id="@+id/kalanVakit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/kalanVakitMarginD"
-            android:text="00:05:12"
-            android:textColor="#455A64"
-            android:textSize="@dimen/currentKalanFontSize" />
 
 
     </LinearLayout>
@@ -58,21 +50,7 @@
         android:paddingRight="@dimen/altGostPadR"
         android:paddingTop="@dimen/altGostPadT">
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:src="@drawable/ic_action_left" />
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/ic_action_right" />
 
         <LinearLayout
             android:id="@+id/sabahLay"
@@ -80,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:gravity="center"
-            android:elevation="2dp"
+
             android:orientation="horizontal">
 
             <TextView
