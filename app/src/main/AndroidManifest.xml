@@ -14,8 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".BackgroundServices"
-            android:exported="false" />
+            android:name="com.olive.prayertimes.BackgroundServices"
+            android:launchMode="singleTask" >
+        </service>
 
         <activity android:name=".Splash">
             <intent-filter>
