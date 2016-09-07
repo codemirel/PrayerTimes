@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                 updateTimes();
             }
             calcDiffInTime();
-            if (timeCount % 60 == 0) {
+            if (timeCount % 30 == 0) {
                 timeCount = 0;
                 send_Notification();
             }
