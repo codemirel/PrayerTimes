@@ -36,17 +36,17 @@ import java.util.Set;
 public class IlkKurulum extends AppCompatActivity {
 
     ArrayAdapter<String> adapter;
-    public static final String url = "http://www.diyanet.gov.tr/tr/PrayerTime/PrayerTimesList";
-    List<Map.Entry<String, Integer>> countries_list;
-    List<Map.Entry<String, Integer>> states_list;
-    List<Map.Entry<String, Integer>> districts_list;
     List<Map.Entry<String, String>> parameters;
     List<Map.Entry<String, Integer>> temp;
     ListView lv;
     final String PREFS_NAME = "MyPrefsFile";
     SharedPreferences settings;
-    SharedPreferences.Editor editor;
     boolean secilenUlke = false;
+
+    public static final String url = "http://www.diyanet.gov.tr/tr/PrayerTime/PrayerTimesList";
+    List<Map.Entry<String, Integer>> countries_list = new ArrayList<>();
+    List<Map.Entry<String, Integer>> states_list = new ArrayList<>();
+    List<Map.Entry<String, Integer>> districts_list = new ArrayList<>();
 
     EditText searchTextBox;
 
@@ -58,10 +58,10 @@ public class IlkKurulum extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        initialize();
-        //SaveData.clearFile(getApplicationContext());
 
-        new JsoupPost(this).execute(parameters);
+        initialize();
+
+        new DataReceiver(this).execute(parameters);
 
         searchTextBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -122,7 +122,7 @@ public class IlkKurulum extends AppCompatActivity {
                 for (Map.Entry<String, Integer> entr : temp) {
                     if (selected.equals(entr.getKey())) {
                         parameters.add(new AbstractMap.SimpleEntry<String, String>(region, Integer.toString(entr.getValue())));
-                        new JsoupPost(IlkKurulum.this).execute(parameters);
+                        new DataReceiver(IlkKurulum.this).execute(parameters);
                         break;
                     }
                 }
@@ -157,7 +157,7 @@ public class IlkKurulum extends AppCompatActivity {
         });
     }
 
-    private void fillListView(List<String> list) {
+    public void fillListView(List<String> list) {
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, list) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -171,7 +171,7 @@ public class IlkKurulum extends AppCompatActivity {
         lv.setAdapter(adapter);
     }
 
-    private List<String> convertMap2List(List<Map.Entry<String, Integer>> param) {
+    public List<String> convertMap2List(List<Map.Entry<String, Integer>> param) {
         List<String> backList = new ArrayList<>();
         for (int i = 0; i < param.size(); i++) {
             String s = param.get(i).getKey().toString();
@@ -180,6 +180,23 @@ public class IlkKurulum extends AppCompatActivity {
         return backList;
     }
 
+    public void startMainAct(){
+        Intent mainAct = new Intent(IlkKurulum.this, MainActivity.class);
+        startActivity(mainAct);
+        finish();
+    }
+
+    private void initialize() {
+        lv = (ListView) findViewById(R.id.listView);
+        searchTextBox = (EditText) findViewById(R.id.searchText);
+        parameters = new ArrayList<>();
+        temp = new ArrayList<>();
+        settings = getSharedPreferences(PREFS_NAME, 0);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*
     private String getCountryNameByValue(String value) {
         for (Map.Entry<String, Integer> entr : countries_list) {
             if (Integer.parseInt(value) == entr.getValue()) {
@@ -217,6 +234,7 @@ public class IlkKurulum extends AppCompatActivity {
             this.activity = activity;
         }
 
+
         @Override
         protected List<Map.Entry<String, Integer>> doInBackground(List<Map.Entry<String, String>>... params) {
             if (params[0].size() == 0) {
@@ -240,6 +258,7 @@ public class IlkKurulum extends AppCompatActivity {
             }
             return null;
         }
+
 
         @Override
         protected void onPostExecute(List<Map.Entry<String, Integer>> list) {
@@ -277,6 +296,7 @@ public class IlkKurulum extends AppCompatActivity {
             }
 
         }
+
 
         private List<Map.Entry<String, Integer>> getCountries() {
             Log.d("ASYNC", "getCuontries() starting..");
@@ -323,8 +343,8 @@ public class IlkKurulum extends AppCompatActivity {
                         .timeout(10 * 1000)
                         .post();
 
-        /*for(Element sp : doc.select("span"))
-            System.out.println(sp);*/
+        for(Element sp : doc.select("span"))
+            System.out.println(sp);
 
                 for (Element opt : doc.select("span").get(14).child(0).children()) {
                     if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
@@ -357,8 +377,8 @@ public class IlkKurulum extends AppCompatActivity {
                         .timeout(10 * 1000)
                         .post();
 
-        /*for(Element sp : doc.select("span"))
-            System.out.println(sp);*/
+            for(Element sp : doc.select("span"))
+                System.out.println(sp);
 
                 for (Element opt : doc.select("span").get(16).child(0).children()) {
                     if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
@@ -375,6 +395,7 @@ public class IlkKurulum extends AppCompatActivity {
 
             return pairList;
         }
+
 
         private void getPrayerTimes(String country_value, String state_value, String district_value) {
             Log.d("ASYNC", "getPrayerTimes() starting..");
@@ -436,19 +457,9 @@ public class IlkKurulum extends AppCompatActivity {
 
         }
 
-    }
+    }*/
 
-    private void initialize() {
-        lv = (ListView) findViewById(R.id.listView);
-        searchTextBox = (EditText) findViewById(R.id.searchText);
-        countries_list = new ArrayList<>();
-        states_list = new ArrayList<>();
-        districts_list = new ArrayList<>();
-        parameters = new ArrayList<>();
-        temp = new ArrayList<>();
-        settings = getSharedPreferences(PREFS_NAME, 0);
-        editor = settings.edit();
-    }
+
 
 
 }
