@@ -1,9 +1,11 @@
 package com.olive.prayertimes;
 
+import android.app.IntentService;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IntegerRes;
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     Map<String, TextView[]> vakitler;
     TextView[] arr_tv_map;
-    Calendar calendar;
+    static Calendar calendar;
     List<String> data;
     Map<String, List<String>> timesOfDays;
     List<String> currentDay;
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private String getCurrentDate() {
+    public static String getCurrentDate() {
         calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         return dateFormat.format(calendar.getTime());
@@ -142,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         return ret;
     }
 
+    public static String suankiVakit = "";
+
     // Su anki namaz vaktinin layer ini boyayan method
     private void paintLayer(int ind) {
         arr_layout[ind].setBackgroundResource(R.color.ayrim);
@@ -155,25 +159,30 @@ public class MainActivity extends AppCompatActivity {
         // En ustteki TextView in guncellenmesi
         switch (ind) {
             case 0:
-                arr_tv_map[14].setText("İmsak'a kalan süre:");
+                suankiVakit = "İmsak'a kalan süre:";
                 break;
             case 1:
-                arr_tv_map[14].setText("Güneş'e kalan süre:");
+                suankiVakit = "Güneş'e kalan süre:";
                 break;
             case 2:
-                arr_tv_map[14].setText("Öğle'ye kalan süre:");
+                suankiVakit = "Öğle'ye kalan süre:";
                 break;
             case 3:
-                arr_tv_map[14].setText("İkindi'ye kalan süre:");
+                suankiVakit = "İkindi'ye kalan süre:";
                 break;
             case 4:
-                arr_tv_map[14].setText("Akşam'a kalan süre:");
+                suankiVakit = "Akşam'a kalan süre:";
                 break;
             case 5:
-                arr_tv_map[14].setText("Yatsı'ya kalan süre:");
+                suankiVakit = "Yatsı'ya kalan süre:";
                 break;
         }
+        arr_tv_map[14].setText(suankiVakit);
     }
+
+    Intent mServiceIntent;
+    long diff;
+    String remaining;
 
     private int calcDiffInTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
@@ -185,9 +194,10 @@ public class MainActivity extends AppCompatActivity {
             //currentDay = timesOfDays.get(getCurrentDate());
             for (int i = 0; i <= 5; i++) {
                 Date date1 = simpleDateFormat.parse(currentDay.get(i));
-                long diff = date2.getTime() - date1.getTime();
+                diff = date2.getTime() - date1.getTime();
                 if (diff < 0) {
-                    arr_tv_map[15].setText(calculations(diff).toString());
+                    remaining = calculations(diff).toString();
+                    arr_tv_map[15].setText(remaining);
                     paintLayer(i);
                     makeBold(i * 2, i * 2 + 1);
                     return i;
@@ -195,16 +205,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Date date1 = simpleDateFormat.parse(timesOfDays.get(getNextXdaysDate(1)).get(0)); //1 sonraki günün imsak vaktini alıyor
-            long diff = (date2.getTime() - simpleDateFormat.parse("24:00").getTime()) + (simpleDateFormat.parse("00:00").getTime() - date1.getTime());
-            arr_tv_map[15].setText(calculations(diff));
+            diff = (date2.getTime() - simpleDateFormat.parse("24:00").getTime()) + (simpleDateFormat.parse("00:00").getTime() - date1.getTime());
+            remaining = calculations(diff).toString();
+            arr_tv_map[15].setText(remaining);
             paintLayer(5);
             makeBold(10, 11);
+            suankiVakit = "İmsak'a Kalan Vakit:";
             return 5;
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    private void send_Notification() {
+        if (remaining != null) {
+            mServiceIntent = new Intent(this, BackgroundServices.class);
+            mServiceIntent.setData(Uri.parse(suankiVakit + " " + remaining.substring(0, 2) + " saat " + remaining.substring(3, 5) + " dakika"));
+            startService(mServiceIntent);
+        }
     }
 
     private String calculations(long diff) {
@@ -244,16 +264,22 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 0);
     }
 
+    int timeCount = 0;
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
       /* do what you need to do */
-            System.out.println(getCurrentTime());
+
             if (getCurrentTime().equals("00:00:00")) {
                 fillTimesOfDays();
                 updateTimes();
             }
             calcDiffInTime();
+            if (timeCount % 60 == 0) {
+                timeCount = 0;
+                send_Notification();
+            }
+            timeCount++;
 
       /* and here comes the "trick" */
             handler.postDelayed(this, 1000);
@@ -275,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
                 arr_tv_map[i].setTypeface(tf_for_vakitler);
             }
         }
-        System.out.println("----------------------");
     }
 
     private void changeTextFonts() {
