@@ -26,6 +26,7 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
         this.activity = activity;
     }
 
+
     @Override
     protected List<Map.Entry<String, Integer>> doInBackground(List<Map.Entry<String, String>>... params) {
         if (params[0].size() == 0) {
@@ -40,7 +41,7 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
                 return getDictricts(params[0].get(0).getValue().toString(), params[0].get(1).getValue().toString());
             } else {
                 Log.d("doInBackground", "call for getPrayerTimes");
-                getPrayerTimes(params[0].get(0).getValue().toString(), params[0].get(1).getValue().toString(), null);
+                getPrayerTimes(params[0].get(0).getValue().toString(), params[0].get(1).getValue().toString(), "");
             }
         } else if (params[0].size() == 3) {
             Log.d("doInBackground", "call for getPrayerTimes");
@@ -179,8 +180,6 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
                         .post();
             }
 
-            SaveData.clearFile(activity.getApplicationContext());
-
             List<String> gun;
             for (Element tr : doc.select("tbody").first().children()) {
                 gun = new ArrayList<>();
@@ -202,9 +201,9 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
                 }
             }
 
-            SaveData.writeToFile(activity.getApplicationContext(), getDistrictNameByValue(district_value) + "\n");
-            SaveData.writeToFile(activity.getApplicationContext(), getStateNameByValue(state_value) + "\n");
-            SaveData.writeToFile(activity.getApplicationContext(), getCountryNameByValue(country_value) + "\n");
+            SaveData.writeToFile(activity.getApplicationContext(), getDistrictNameByValue(district_value) + ":" + district_value + "\n");
+            SaveData.writeToFile(activity.getApplicationContext(), getStateNameByValue(state_value) + ":" + state_value + "\n");
+            SaveData.writeToFile(activity.getApplicationContext(), getCountryNameByValue(country_value) + ":" + country_value + "\n");
 
 
         } catch (IOException e) {
@@ -220,7 +219,7 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
             }
         }
         //System.out.println("Country size: " + countries_list.size());
-        return null;
+        return "";
     }
 
     private String getStateNameByValue(String value) {
@@ -230,7 +229,7 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
             }
         }
         //System.out.println("State size: " + states_list.size());
-        return null;
+        return "";
     }
 
     private String getDistrictNameByValue(String value) {
@@ -242,7 +241,7 @@ public class DataReceiver extends AsyncTask<List<Map.Entry<String, String>>, Voi
             }
             //System.out.println("District size: " + districts_list.size());
         }
-        return null;
+        return "";
     }
 
 

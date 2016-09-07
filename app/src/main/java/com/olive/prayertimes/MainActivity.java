@@ -39,11 +39,10 @@ public class MainActivity extends AppCompatActivity {
     Map<String, TextView[]> vakitler;
     TextView[] arr_tv_map;
     Calendar calendar;
-    List<String> data;
-    Map<String, List<String>> timesOfDays;
-    List<String> currentDay;
     LinearLayout[] arr_layout;
     private Handler handler;
+
+    TimeUpdater timeUpdater;
 
 
     @Override
@@ -55,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         changeTextFonts();
 
-        timesOfDays = new HashMap<>();
-        currentDay = new ArrayList<>();
+        timeUpdater = new TimeUpdater(this);
+
         calendar = Calendar.getInstance();
 
         arr_layout = new LinearLayout[6];
@@ -67,48 +66,24 @@ public class MainActivity extends AppCompatActivity {
         arr_layout[4] = (LinearLayout) findViewById(R.id.aksamLay);
         arr_layout[5] = (LinearLayout) findViewById(R.id.yatsiLay);
 
-        fillTimesOfDays();
-        updateTimes();
+        timeUpdater.fillTimesOfDays();
+        updateTimes(timeUpdater.currentDay);
         updateState();
         checkTimer();
     }
 
-    /**
-     * Vakitler okunur
-     * timesOfDays Map'i doldurulur
-     * currentDay tarihleri alınır
-     */
-    private void fillTimesOfDays() {
-        data = new ArrayList<>(SaveData.readFromFile(getApplicationContext()));
-
-        List<String> temp = new ArrayList<>();
-        for (int i = 0; i < data.size() - 3; i++) {
-            if ((i + 9) % 9 == 0) {
-                for (int j = 1; j <= 7; j++)
-                    temp.add(data.get(i + j));
-                timesOfDays.put(data.get(i), new ArrayList<String>(temp));
-                temp.clear();
-            }
-        }
-
-        currentDay = timesOfDays.get(getCurrentDate());
-    }
 
     // Vakitler update edilir
-    private void updateTimes() {
+    private void updateTimes(List<String> day) {
         for (int i = 1; i <= 6; i++) {
-            arr_tv_map[2 * (i - 1) + 1].setText(currentDay.get(i - 1));
+            arr_tv_map[2 * (i - 1) + 1].setText(day.get(i - 1));
         }
-        arr_tv_map[16].setText(getCurrentDate());
+        arr_tv_map[16].setText(timeUpdater.getCurrentDate());
     }
 
     // State/Country update edilir
     private void updateState() {
-        String ulkeSehirIlce = "";
-        if (data.get(data.size() - 3) != null)
-            ulkeSehirIlce += data.get(data.size() - 3) + "/";
-        ulkeSehirIlce += data.get(data.size() - 2) + "/" + data.get(data.size() - 1);
-        arr_tv_map[12].setText(ulkeSehirIlce);
+        arr_tv_map[12].setText(timeUpdater.getStateInfo());
     }
 
     private String getCurrentTime() {
@@ -116,30 +91,6 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         return timeFormat.format(calendar.getTime());
 
-    }
-
-    private String getCurrentDate() {
-        calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        return dateFormat.format(calendar.getTime());
-    }
-
-    private String getPrevXdaysDate(int x) {
-        calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -x);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String ret = dateFormat.format(calendar.getTime());
-        calendar.add(Calendar.DAY_OF_YEAR, x);
-        return ret;
-    }
-
-    private String getNextXdaysDate(int x) {
-        calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, x);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        String ret = dateFormat.format(calendar.getTime());
-        calendar.add(Calendar.DAY_OF_YEAR, -x);
-        return ret;
     }
 
     // Su anki namaz vaktinin layer ini boyayan method
@@ -184,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             Date date2 = sdf_forCurrent.parse(formattedDate);
             //currentDay = timesOfDays.get(getCurrentDate());
             for (int i = 0; i <= 5; i++) {
-                Date date1 = simpleDateFormat.parse(currentDay.get(i));
+                Date date1 = simpleDateFormat.parse(timeUpdater.currentDay.get(i));
                 long diff = date2.getTime() - date1.getTime();
                 if (diff < 0) {
                     arr_tv_map[15].setText(calculations(diff).toString());
@@ -194,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Date date1 = simpleDateFormat.parse(timesOfDays.get(getNextXdaysDate(1)).get(0)); //1 sonraki günün imsak vaktini alıyor
+            Date date1 = simpleDateFormat.parse(timeUpdater.timesOfDays.get(timeUpdater.getNextXdaysDate(1)).get(0)); //1 sonraki günün imsak vaktini alıyor
             long diff = (date2.getTime() - simpleDateFormat.parse("24:00").getTime()) + (simpleDateFormat.parse("00:00").getTime() - date1.getTime());
             arr_tv_map[15].setText(calculations(diff));
             paintLayer(5);
@@ -250,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
       /* do what you need to do */
             System.out.println(getCurrentTime());
             if (getCurrentTime().equals("00:00:00")) {
-                fillTimesOfDays();
-                updateTimes();
+                timeUpdater.fillTimesOfDays();
+                updateTimes(timeUpdater.currentDay);
             }
             calcDiffInTime();
 
