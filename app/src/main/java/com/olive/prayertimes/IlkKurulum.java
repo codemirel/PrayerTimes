@@ -94,7 +94,7 @@ public class IlkKurulum extends AppCompatActivity {
                         selectedUlke[0] = selected;
                         useList = temp;
                         region = "Country";
-                        if (selected.equals("ABD") || selected.equals("TÜRKİYE") || selected.equals("KANADA")) {
+                        if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("TÜRKİYE") || selectedUlke[0].equals("KANADA")) {
                             secilenUlke = true;
 
                         } else {
@@ -129,9 +129,9 @@ public class IlkKurulum extends AppCompatActivity {
 
                 switch (parameters.size()) {
                     case 0: {
-                        if (selected.equals("ABD") || selected.equals("TÜRKİYE") || selected.equals("KANADA")) {
+                        if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("TÜRKİYE") || selectedUlke[0].equals("KANADA")) {
                             secilenUlke = true;
-                            if (selected.equals("ABD") || selected.equals("KANADA"))
+                            if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("KANADA"))
                                 setTitle("Eyalet Seçiniz");
                             else
                                 setTitle("Şehir Seçiniz");

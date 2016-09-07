@@ -74,18 +74,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *  Vakitler okunur
-     *  timesOfDays Map'i doldurulur
-     *  currentDay tarihleri alınır
+     * Vakitler okunur
+     * timesOfDays Map'i doldurulur
+     * currentDay tarihleri alınır
      */
-    private void fillTimesOfDays(){
+    private void fillTimesOfDays() {
         data = new ArrayList<>(SaveData.readFromFile(getApplicationContext()));
 
         List<String> temp = new ArrayList<>();
-        for(int i = 0; i < data.size() - 3; i++){
-            if((i+9) % 9 == 0){
-                for(int j = 1; j <= 7; j++)
-                    temp.add(data.get(i+j));
+        for (int i = 0; i < data.size() - 3; i++) {
+            if ((i + 9) % 9 == 0) {
+                for (int j = 1; j <= 7; j++)
+                    temp.add(data.get(i + j));
                 timesOfDays.put(data.get(i), new ArrayList<String>(temp));
                 temp.clear();
             }
@@ -96,8 +96,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Vakitler update edilir
     private void updateTimes() {
-        for(int i = 1; i <= 6; i++){
-            arr_tv_map[2*(i-1)+1].setText(currentDay.get(i-1));
+        for (int i = 1; i <= 6; i++) {
+            arr_tv_map[2 * (i - 1) + 1].setText(currentDay.get(i - 1));
         }
         arr_tv_map[16].setText(getCurrentDate());
     }
@@ -105,25 +105,27 @@ public class MainActivity extends AppCompatActivity {
     // State/Country update edilir
     private void updateState() {
         String ulkeSehirIlce = "";
-        if(data.get(data.size() - 3) != null)
+        if (data.get(data.size() - 3) != null)
             ulkeSehirIlce += data.get(data.size() - 3) + "/";
         ulkeSehirIlce += data.get(data.size() - 2) + "/" + data.get(data.size() - 1);
         arr_tv_map[12].setText(ulkeSehirIlce);
     }
 
     private String getCurrentTime() {
-
+        calendar = Calendar.getInstance();
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         return timeFormat.format(calendar.getTime());
 
     }
 
     private String getCurrentDate() {
+        calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         return dateFormat.format(calendar.getTime());
     }
 
-    private String getPrevXdaysDate(int x){
+    private String getPrevXdaysDate(int x) {
+        calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, -x);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         String ret = dateFormat.format(calendar.getTime());
@@ -131,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         return ret;
     }
 
-    private String getNextXdaysDate(int x){
+    private String getNextXdaysDate(int x) {
+        calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, x);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         String ret = dateFormat.format(calendar.getTime());
@@ -142,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     // Su anki namaz vaktinin layer ini boyayan method
     private void paintLayer(int ind) {
         arr_layout[ind].setBackgroundResource(R.color.ayrim);
-        makeBold(ind * 2, ind * 2 + 1);
+
         for (int i = 0; i < 6; i++) {
             if (i != ind) {
                 arr_layout[i].setBackgroundResource(0);
@@ -152,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         // En ustteki TextView in guncellenmesi
         switch (ind) {
             case 0:
-                arr_tv_map[14].setText("Sabah'a kalan süre:");
+                arr_tv_map[14].setText("İmsak'a kalan süre:");
                 break;
             case 1:
                 arr_tv_map[14].setText("Güneş'e kalan süre:");
@@ -175,24 +178,28 @@ public class MainActivity extends AppCompatActivity {
     private int calcDiffInTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         SimpleDateFormat sdf_forCurrent = new SimpleDateFormat("HH:mm:ss");
-        Date date1, date2;
+        Calendar c = Calendar.getInstance();
+        String formattedDate = sdf_forCurrent.format(c.getTime());
         try {
-            date2 = sdf_forCurrent.parse(getCurrentTime());
+            Date date2 = sdf_forCurrent.parse(formattedDate);
+            //currentDay = timesOfDays.get(getCurrentDate());
             for (int i = 0; i <= 5; i++) {
-                date1 = simpleDateFormat.parse(currentDay.get(i));
+                Date date1 = simpleDateFormat.parse(currentDay.get(i));
                 long diff = date2.getTime() - date1.getTime();
                 if (diff < 0) {
-                    arr_tv_map[15].setText(calculations(diff));
+                    arr_tv_map[15].setText(calculations(diff).toString());
                     paintLayer(i);
+                    makeBold(i * 2, i * 2 + 1);
                     return i;
                 }
             }
 
-            date1 = simpleDateFormat.parse(timesOfDays.get(getNextXdaysDate(1)).get(0)); //1 sonraki günün imsak vaktini alıyor
+            Date date1 = simpleDateFormat.parse(timesOfDays.get(getNextXdaysDate(1)).get(0)); //1 sonraki günün imsak vaktini alıyor
             long diff = (date2.getTime() - simpleDateFormat.parse("24:00").getTime()) + (simpleDateFormat.parse("00:00").getTime() - date1.getTime());
             arr_tv_map[15].setText(calculations(diff));
-            //paintLayer(6);
-            return 6;
+            paintLayer(5);
+            makeBold(10, 11);
+            return 5;
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -200,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
         return -1;
     }
 
-    private String calculations(long diff){
+    private String calculations(long diff) {
         int diffSeconds = (int) diff / 1000 % 60;
         int diffMinutes = (int) diff / (60 * 1000) % 60;
         int diffHours = (int) diff / (60 * 60 * 1000);
@@ -241,7 +248,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
       /* do what you need to do */
+            System.out.println(getCurrentTime());
             if (getCurrentTime().equals("00:00:00")) {
+                fillTimesOfDays();
                 updateTimes();
             }
             calcDiffInTime();
@@ -266,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
                 arr_tv_map[i].setTypeface(tf_for_vakitler);
             }
         }
+        System.out.println("----------------------");
     }
 
     private void changeTextFonts() {
@@ -339,5 +349,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 }

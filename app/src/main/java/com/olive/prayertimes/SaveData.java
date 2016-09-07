@@ -28,7 +28,7 @@ public class SaveData {
         Log.d(TAG, "writeToFile");
         File path = context.getFilesDir();
         //System.out.println(path.toString());
-        File file = new File(path, "prayerTimes.txt");
+        File file = new File(path, "prayerTimes.bin");
         try {
             Files.append(str, file, Charsets.UTF_8);
         } catch (IOException e) {
@@ -39,7 +39,7 @@ public class SaveData {
     public static List<String> readFromFile(Context context){
         Log.d(TAG, "readFromFile");
         File path = context.getFilesDir();
-        File file = new File(path, "prayerTimes.txt");
+        File file = new File(path, "prayerTimes.bin");
         List<String> contents = new ArrayList<>();
         try {
             contents = Files.readLines(file, Charsets.UTF_8);
@@ -54,7 +54,7 @@ public class SaveData {
         Log.d(TAG, "clearFile");
         File path = context.getFilesDir();
         //System.out.println(path.toString());
-        File file = new File(path, "prayerTimes.txt");
+        File file = new File(path, "prayerTimes.bin");
         try {
             Files.write("", file, Charsets.UTF_8);
         } catch (IOException e) {

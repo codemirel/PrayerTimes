@@ -68,7 +68,7 @@
                 android:layout_margin="10dp"
 
                 android:gravity="center|start"
-                android:text="Sabah:"
+                android:text="İmsak:"
                 android:textColor="#000000"
                 android:textSize="@dimen/asagiGostergeFontSize" />
 

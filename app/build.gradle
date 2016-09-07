@@ -26,6 +26,5 @@ dependencies {
     compile 'com.android.support:design:24.2.0'
     compile files('libs/jsoup-1.9.2.jar')
     // https://mvnrepository.com/artifact/com.google.guava/guava
-    compile group: 'com.google.guava', name: 'guava', version: '19.0'
-
+    compile 'com.google.guava:guava:19.0'
 }
