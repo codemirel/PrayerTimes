@@ -145,7 +145,6 @@ public class TimeUpdater {
     }
 
 
-
     private String calculations(long diff) {
         int diffSeconds = (int) diff / 1000 % 60;
         int diffMinutes = (int) diff / (60 * 1000) % 60;

@@ -67,7 +67,7 @@ public class BackgroundServices extends Service {
         NotificationCompat.Builder mBuilder =
                         (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                         .setLargeIcon(bitmap)
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(getNotificationIcon())
                         .setAutoCancel(true)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(show))
                         .setContentTitle(show)
@@ -78,6 +78,10 @@ public class BackgroundServices extends Service {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
         mNotificationManager.notify(101, mBuilder.build());
+    }
+
+    private int getNotificationIcon() {
+        return R.drawable.ic_action_kible;
     }
 
 
