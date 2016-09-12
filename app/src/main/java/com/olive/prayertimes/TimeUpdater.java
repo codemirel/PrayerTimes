@@ -87,7 +87,7 @@ public class TimeUpdater {
             params.add(new AbstractMap.SimpleEntry<String, String>("City", district_value));
         for(int i=0;i<params.size();i++)
             System.out.println(params.get(i).getKey() + ": " + params.get(i).getValue());
-        //new DataReceiver(IlkKurulum.this).execute(params);
+        //new DataReceiver(ManuelKurulum.this).execute(params);
     }
 
     long diff;

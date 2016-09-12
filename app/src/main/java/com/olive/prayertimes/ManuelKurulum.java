@@ -2,17 +2,11 @@ package com.olive.prayertimes;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
-import android.os.Environment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,33 +16,23 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
+import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-public class IlkKurulum extends AppCompatActivity {
+public class ManuelKurulum extends AppCompatActivity {
 
-    ArrayAdapter<String> adapter;
-    List<Map.Entry<String, String>> parameters;
-    List<Map.Entry<String, Integer>> temp;
-    ListView lv;
+    private ArrayAdapter<String> adapter;
+    private ListView lv;
     final String PREFS_NAME = "MyPrefsFile";
     SharedPreferences settings;
     boolean secilenUlke = false;
 
-    public static final String url = "http://www.diyanet.gov.tr/tr/PrayerTime/PrayerTimesList";
-    List<Map.Entry<String, Integer>> countries_list = new ArrayList<>();
-    List<Map.Entry<String, Integer>> states_list = new ArrayList<>();
-    List<Map.Entry<String, Integer>> districts_list = new ArrayList<>();
-
     EditText searchTextBox;
+
+    DataReceiver dataReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +45,7 @@ public class IlkKurulum extends AppCompatActivity {
 
         initialize();
 
-        new DataReceiver(this).execute(parameters);
+        dataReceiver.runForManuel();
 
         searchTextBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -71,7 +55,7 @@ public class IlkKurulum extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                IlkKurulum.this.adapter.getFilter().filter(s);
+                ManuelKurulum.this.adapter.getFilter().filter(s);
             }
 
             @Override
@@ -85,49 +69,45 @@ public class IlkKurulum extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                List<Map.Entry<String, Integer>> useList = null;
                 String region = null;
                 String selected = (String) lv.getItemAtPosition(position);
+                String value = "";
 
-                switch (parameters.size()) {
+                switch (dataReceiver.parameters.length()) {
                     case 0: {
                         selectedUlke[0] = selected;
-                        useList = temp;
                         region = "Country";
                         if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("TÜRKİYE") || selectedUlke[0].equals("KANADA")) {
                             secilenUlke = true;
-
                         } else {
                             secilenUlke = false;
                         }
+                        value = dataReceiver.getCountryIdByName(selected);
+                        break;
                     }
                     case 1: {
-                        useList = temp;
                         region = "State";
                         if (!secilenUlke) {
                             settings.edit().putBoolean(selected, true);
                         }
+                        value = dataReceiver.getStateIdByName(selected);
                         break;
                     }
                     case 2: {
-                        useList = temp;
                         region = "District";
                         if (secilenUlke) {
                             settings.edit().putBoolean(selected, true);
                         }
+                        value = dataReceiver.getDistrictIdByName(selected);
                         break;
                     }
 
                 }
-                for (Map.Entry<String, Integer> entr : temp) {
-                    if (selected.equals(entr.getKey())) {
-                        parameters.add(new AbstractMap.SimpleEntry<String, String>(region, Integer.toString(entr.getValue())));
-                        new DataReceiver(IlkKurulum.this).execute(parameters);
-                        break;
-                    }
-                }
 
-                switch (parameters.size()) {
+                dataReceiver.addToParams(region, value);
+                dataReceiver.runForManuel();
+
+                switch (dataReceiver.parameters.length()) {
                     case 0: {
                         if (selectedUlke[0].equals("ABD") || selectedUlke[0].equals("TÜRKİYE") || selectedUlke[0].equals("KANADA")) {
                             secilenUlke = true;
@@ -171,17 +151,16 @@ public class IlkKurulum extends AppCompatActivity {
         lv.setAdapter(adapter);
     }
 
-    public List<String> convertMap2List(List<Map.Entry<String, Integer>> param) {
+    public List<String> json2List(JSONObject param) {
         List<String> backList = new ArrayList<>();
-        for (int i = 0; i < param.size(); i++) {
-            String s = param.get(i).getKey().toString();
-            backList.add(s);
+        for (Iterator<String> iterator = param.keys(); iterator.hasNext(); ) {
+            backList.add((String) iterator.next());
         }
         return backList;
     }
 
-    public void startMainAct(){
-        Intent mainAct = new Intent(IlkKurulum.this, MainActivity.class);
+    public void startMainAct() {
+        Intent mainAct = new Intent(ManuelKurulum.this, MainActivity.class);
         startActivity(mainAct);
         finish();
     }
@@ -189,9 +168,8 @@ public class IlkKurulum extends AppCompatActivity {
     private void initialize() {
         lv = (ListView) findViewById(R.id.listView);
         searchTextBox = (EditText) findViewById(R.id.searchText);
-        parameters = new ArrayList<>();
-        temp = new ArrayList<>();
         settings = getSharedPreferences(PREFS_NAME, 0);
+        dataReceiver = new DataReceiver(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,9 +206,9 @@ public class IlkKurulum extends AppCompatActivity {
 
     private class JsoupPost extends AsyncTask<List<Map.Entry<String, String>>, Void, List<Map.Entry<String, Integer>>> {
 
-        private IlkKurulum activity;
+        private ManuelKurulum activity;
 
-        public JsoupPost(IlkKurulum activity) {
+        public JsoupPost(ManuelKurulum activity) {
             this.activity = activity;
         }
 
@@ -282,7 +260,7 @@ public class IlkKurulum extends AppCompatActivity {
                 } else {
                     Log.d("onPostExecute", "Times received..");
                     //System.out.println(SaveData.readFromFile(getApplicationContext()));
-                    Intent mainAct = new Intent(IlkKurulum.this, MainActivity.class);
+                    Intent mainAct = new Intent(ManuelKurulum.this, MainActivity.class);
                     startActivity(mainAct);
                     finish();
 
@@ -290,7 +268,7 @@ public class IlkKurulum extends AppCompatActivity {
             } else if (activity.parameters.size() == 3) {
                 Log.d("onPostExecute", "Times received..");
                 //System.out.println(SaveData.readFromFile(getApplicationContext()));
-                Intent mainAct = new Intent(IlkKurulum.this, MainActivity.class);
+                Intent mainAct = new Intent(ManuelKurulum.this, MainActivity.class);
                 startActivity(mainAct);
                 finish();
             }
@@ -458,8 +436,6 @@ public class IlkKurulum extends AppCompatActivity {
         }
 
     }*/
-
-
 
 
 }
