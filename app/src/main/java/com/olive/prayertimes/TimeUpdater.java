@@ -58,6 +58,7 @@ public class TimeUpdater {
 
         currentDay = timesOfDays.get(getCurrentDate());
 
+
     }
 
     public String getStateInfo(){
