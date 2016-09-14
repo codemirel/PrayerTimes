@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +27,7 @@ public class DataReceiver {
     private ManuelKurulum activity;
     private Context context;
     private ProgressBar progressBar;
+    private TextView progressText;
 
     private static final String url = "http://www.diyanet.gov.tr/tr/PrayerTime/PrayerTimesList";
 
@@ -36,6 +39,7 @@ public class DataReceiver {
     public DataReceiver(ManuelKurulum activity) {
         this.activity = activity;
         progressBar = (ProgressBar) activity.findViewById(R.id.progressBar);
+        progressText = (TextView) activity.findViewById(R.id.progressText);
         parameters = new JSONObject();
         countries_list = new JSONObject();
         states_list = new JSONObject();
@@ -47,6 +51,9 @@ public class DataReceiver {
 
     public DataReceiver(Context context) {
         this.context = context;
+        View v = LayoutInflater.from(context).inflate(R.layout.activity_splash, null);
+        progressBar = (ProgressBar) v.findViewById(R.id.progressBar2);
+        progressText = (TextView) v.findViewById(R.id.progressText2);
         parameters = new JSONObject();
         countries_list = new JSONObject();
         states_list = new JSONObject();
@@ -156,6 +163,8 @@ public class DataReceiver {
         @Override
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
+            progressText.setVisibility(View.VISIBLE);
+            progressText.setText("Info loading..");
         }
 
         @Override
@@ -204,6 +213,7 @@ public class DataReceiver {
         protected void onPostExecute(JSONObject json_list) {
             super.onPostExecute(json_list);
             progressBar.setVisibility(View.INVISIBLE);
+            progressText.setVisibility(View.INVISIBLE);
             if (parameters.length() == 0) {
                 Log.d("onPostExecute", "Countries are listing..");
                 countries_list = json_list;
@@ -378,6 +388,14 @@ public class DataReceiver {
     public class postForGps extends AsyncTask<JSONObject, Void, JSONObject>{
 
         @Override
+        protected void onPreExecute() {
+            Log.d("postForGps", "onPreExecute");
+            progressBar.setVisibility(View.VISIBLE);
+            /*progressText.setText("Info loading..");
+            progressText.setVisibility(View.VISIBLE);*/
+        }
+
+        @Override
         protected JSONObject doInBackground(JSONObject... params) {
             if (params[0].length() == 0) {
                 Log.d("doInBackground", "call for getCountries");
@@ -422,6 +440,8 @@ public class DataReceiver {
         @Override
         protected void onPostExecute(JSONObject json_list) {
             super.onPostExecute(json_list);
+            progressBar.setVisibility(View.INVISIBLE);
+            progressText.setVisibility(View.INVISIBLE);
             if (par.length() == 0) {
                 Log.d("onPostExecute", "Countries are listing..");
                 countries_list = json_list;

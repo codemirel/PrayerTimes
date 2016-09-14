@@ -5,6 +5,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -23,6 +26,7 @@ public class MyGeocoder {
     private Context context;
     // GPSTracker class
     private GPSTracker gps;
+
 
     Locale locale = new Locale("tr", "TR");
 
@@ -63,7 +67,7 @@ public class MyGeocoder {
 
         @Override
         protected void onPreExecute() {
-            //progressBar.setVisibility(View.VISIBLE);
+            //progressBar2.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -95,6 +99,7 @@ public class MyGeocoder {
             if (address == null) {
                 //progressBar.setVisibility(View.INVISIBLE);
                 System.out.println(errorMessage);
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
             } else {
                 String addressName = "";
                 for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 public class Splash extends Activity {
 
@@ -38,6 +39,11 @@ public class Splash extends Activity {
 
             if(!hasPermissions(this, PERMISSIONS)){
                 ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQ);
+            } else{
+                System.out.println("All permission already has");
+                Toast.makeText(getApplicationContext(), "All permission already has", Toast.LENGTH_SHORT).show();
+                MyGeocoder geo = new MyGeocoder(this);
+                geo.GeoAddress();
             }
 
 
@@ -55,7 +61,7 @@ public class Splash extends Activity {
 
     private boolean hasPermissions(Context context, String... permissions){
         // Here, thisActivity is the current activity
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+        if (/*android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && */context != null && permissions != null) {
             for (String permission : permissions) {
                 if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                     return false;
