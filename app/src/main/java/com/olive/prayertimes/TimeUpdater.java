@@ -23,19 +23,18 @@ public class TimeUpdater {
     public String country_value, state_value, district_value;
     private Calendar calendar;
 
-    List<Map.Entry<String, String>> params;
-
+    public boolean flagUpdate;
     List<String> data;
     Map<String, List<String>> timesOfDays;
-    List<String> currentDay;
+    List<String> currentDay, nextDay;
 
     public TimeUpdater(Context context) {
         this.context = context;
-        params = new ArrayList<>();
         timesOfDays = new HashMap<>();
         data = new ArrayList<>();
         currentDay = new ArrayList<>();
         country_value = state_value = district_value = "-1";
+        flagUpdate = true;
     }
 
     /**
@@ -47,8 +46,8 @@ public class TimeUpdater {
         data = new ArrayList<>(SaveData.readFromFile(context));
 
         List<String> temp = new ArrayList<>();
-        for (int i = 0; i < data.size() - 3; i++) {
-            if ((i + 9) % 9 == 0) {
+        for (int i = 3; i < data.size(); i++) {
+            if (((i-3) + 9) % 9 == 0) {
                 for (int j = 1; j <= 7; j++)
                     temp.add(data.get(i + j));
                 timesOfDays.put(data.get(i), new ArrayList<String>(temp));
@@ -57,39 +56,40 @@ public class TimeUpdater {
         }
 
         currentDay = timesOfDays.get(getCurrentDate());
+        nextDay = timesOfDays.get(getNextXdaysDate(1));
 
 
+    }
+
+    public void receiveNewData(){
+        DataReceiver dataReceiver = new DataReceiver(context);
+        dataReceiver.addToParams("Country", country_value);
+        dataReceiver.addToParams("State", state_value);
+        dataReceiver.addToParams("District", district_value);
+        System.out.println(country_value + "/" + state_value + "/" + district_value);
+        dataReceiver.runForBackground();
     }
 
     public String getStateInfo(){
         String ulkeSehirIlce = "";
         int index;
 
-        if (!data.get(data.size() - 3).equals("" + ":" + "")){
-            index = data.get(data.size() - 3).indexOf(':');
-            ulkeSehirIlce += data.get(data.size() - 3).substring(0, index) + "/";
-            district_value = data.get(data.size() - 3).substring(index+1);
+        if (!data.get(0).equals("null" + ":" + "-1")){
+            index = data.get(0).indexOf(':');
+            ulkeSehirIlce += data.get(0).substring(0, index) + "/";
+            district_value = data.get(0).substring(index+1);
         }
-        index = data.get(data.size() - 2).indexOf(':');
-        ulkeSehirIlce += data.get(data.size() - 2).substring(0, index) + "/";
-        state_value = data.get(data.size() - 2).substring(index+1);
+        index = data.get(1).indexOf(':');
+        ulkeSehirIlce += data.get(1).substring(0, index) + "/";
+        state_value = data.get(1).substring(index+1);
 
-        index = data.get(data.size() - 1).indexOf(':');
-        ulkeSehirIlce += data.get(data.size() - 1).substring(0, index);
-        country_value = data.get(data.size() - 1).substring(index+1);
+        index = data.get(2).indexOf(':');
+        ulkeSehirIlce += data.get(2).substring(0, index);
+        country_value = data.get(2).substring(index+1);
 
         return ulkeSehirIlce;
     }
 
-    public void receiveAndUpdateTimes(){
-        params.add(new AbstractMap.SimpleEntry<String, String>("Country", country_value));
-        params.add(new AbstractMap.SimpleEntry<String, String>("State", state_value));
-        if(!district_value.equals("-1"))
-            params.add(new AbstractMap.SimpleEntry<String, String>("City", district_value));
-        for(int i=0;i<params.size();i++)
-            System.out.println(params.get(i).getKey() + ": " + params.get(i).getValue());
-        //new DataReceiver(ManuelKurulum.this).execute(params);
-    }
 
     long diff;
     public String remaining, toNotif;

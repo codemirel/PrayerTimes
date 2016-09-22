@@ -70,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
         startBackgroundService();
         timeUpdater.fillTimesOfDays();
-        updateTimes(timeUpdater.currentDay);
+        if(timeUpdater.currentDay == null)
+            updateTimes(timeUpdater.nextDay);
+        else
+            updateTimes(timeUpdater.currentDay);
         updateState();
         checkTimer();
     }

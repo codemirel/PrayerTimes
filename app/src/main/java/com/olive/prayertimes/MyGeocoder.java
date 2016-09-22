@@ -132,13 +132,9 @@ public class MyGeocoder {
                 Toast.makeText(context, district + "/" + state + "/" + country, Toast.LENGTH_SHORT).show();
 
                 DataReceiver dataReceiver = new DataReceiver(context.getApplicationContext());
-                try {
-                    dataReceiver.parameters.put("Country", country);
-                    dataReceiver.parameters.put("State", state);
-                    dataReceiver.parameters.put("District", district);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                dataReceiver.addToParams("Country", country);
+                dataReceiver.addToParams("State", state);
+                dataReceiver.addToParams("District", district);
                 dataReceiver.runForGps();
 
             }

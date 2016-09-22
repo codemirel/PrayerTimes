@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,8 +16,10 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by frkn on 07.09.2016.
@@ -46,28 +48,26 @@ public class DataReceiver {
         districts_list = new JSONObject();
     }
 
-    JSONObject par;
-    boolean secilen=false;
+    boolean secilen = false;
 
     public DataReceiver(Context context) {
         this.context = context;
-        View v = LayoutInflater.from(context).inflate(R.layout.activity_splash, null);
-        progressBar = (ProgressBar) v.findViewById(R.id.progressBar2);
-        progressText = (TextView) v.findViewById(R.id.progressText2);
         parameters = new JSONObject();
         countries_list = new JSONObject();
         states_list = new JSONObject();
         districts_list = new JSONObject();
-        par = new JSONObject();
     }
 
     public void runForManuel() {
         new postForManuel().execute(parameters);
     }
 
+    public void runForGps() {
+        new postForGps().execute(parameters);
+    }
 
-    public void runForGps(){
-        new postForGps().execute(par);
+    public void runForBackground() {
+        new postForBackGround().execute(parameters);
     }
 
     public void addToParams(String region, String id) {
@@ -158,6 +158,152 @@ public class DataReceiver {
         return "";
     }
 
+    private JSONObject getCountries() {
+        Log.d("ASYNC", "getCuontries() starting..");
+        org.jsoup.nodes.Document doc = null;
+        JSONObject ret = new JSONObject();
+        try {
+
+            doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                    .referrer("http://www.google.com")
+                    .timeout(10 * 1000)
+                    .post();
+
+            for (Element opt : doc.select("span").get(12).child(0).children()) {
+                ret.put(opt.text(), opt.attr("value").toString());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    private JSONObject getStates(String country_value) {
+        Log.d("ASYNC", "getStates() starting..");
+        org.jsoup.nodes.Document doc = null;
+        JSONObject ret = new JSONObject();
+        try {
+
+            doc = Jsoup.connect(url)
+                    .data("Country", country_value)
+                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                    .referrer("http://www.google.com")
+                    .timeout(10 * 1000)
+                    .post();
+
+            for (Element opt : doc.select("span").get(14).child(0).children()) {
+                if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
+                    continue;
+                ret.put(opt.text(), opt.attr("value").toString());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    private JSONObject getDictricts(String country_value, String state_value) {
+        Log.d("ASYNC", "getDistricts() starting..");
+        org.jsoup.nodes.Document doc = null;
+        JSONObject ret = new JSONObject();
+        try {
+
+            doc = Jsoup.connect(url)
+                    .data("Country", country_value)
+                    .data("State", state_value)
+                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                    .referrer("http://www.google.com")
+                    .timeout(10 * 1000)
+                    .post();
+
+            for (Element opt : doc.select("span").get(16).child(0).children()) {
+                if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
+                    continue;
+                ret.put(opt.text(), opt.attr("value").toString());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    private void getPrayerTimes(String country_value, String state_value, String district_value) {
+        Log.d("ASYNC", "getPrayerTimes() starting..");
+        String period_value = "Aylik";
+        org.jsoup.nodes.Document doc = null;
+        List<List<String>> listOfList = new ArrayList<>();
+        try {
+
+            if (district_value.equals("") || district_value == null || district_value.equals("-1")) {
+                doc = Jsoup.connect(url)
+                        .data("Country", country_value)
+                        .data("State", state_value)
+                        .data("period", period_value)
+                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                        .referrer("http://www.google.com")
+                        .timeout(10 * 1000)
+                        .post();
+
+                SaveData.writeToFile(activity.getApplicationContext(), "null" + ":" + "-1" + "\n");
+
+            } else {
+                doc = Jsoup.connect(url)
+                        .data("Country", country_value)
+                        .data("State", state_value)
+                        .data("City", district_value)
+                        .data("period", period_value)
+                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                        .referrer("http://www.google.com")
+                        .timeout(10 * 1000)
+                        .post();
+
+                SaveData.writeToFile(activity.getApplicationContext(), getDistrictNameById(district_value) + ":" + district_value + "\n");
+            }
+
+            SaveData.writeToFile(activity.getApplicationContext(), getStateNameById(state_value) + ":" + state_value + "\n");
+            SaveData.writeToFile(activity.getApplicationContext(), getCountryNameById(country_value) + ":" + country_value + "\n");
+
+            List<String> gun;
+            for (Element tr : doc.select("tbody").first().children()) {
+                gun = new ArrayList<>();
+                for (Element td : tr.select("td")) {
+                    if (td.text() != "")
+                        gun.add(td.text());
+                }
+                listOfList.add(gun);
+            }
+
+
+            for (List<String> l : listOfList) {
+                if (l.size() != 0) {
+                    System.out.println(l.get(0) + " added to data");
+                    for (String s : l) {
+                        SaveData.writeToFile(activity.getApplicationContext(), s + "\n");
+                    }
+                    SaveData.writeToFile(activity.getApplicationContext(), "----------------------\n");
+                }
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public class postForManuel extends AsyncTask<JSONObject, Void, JSONObject> {
 
         @Override
@@ -170,10 +316,10 @@ public class DataReceiver {
         @Override
         protected JSONObject doInBackground(JSONObject... params) {
             if (params[0].length() == 0) {
-                Log.d("doInBackground", "call for getCountries");
+                Log.d("postForManuel", "call for getCountries");
                 return getCountries();
             } else if (params[0].length() == 1) {
-                Log.d("doInBackground", "call for getStates");
+                Log.d("postForManuel", "call for getStates");
                 try {
                     return getStates(params[0].getString("Country"));
                 } catch (JSONException e) {
@@ -181,14 +327,14 @@ public class DataReceiver {
                 }
             } else if (params[0].length() == 2) {
                 if (activity.secilenUlke) {
-                    Log.d("doInBackground", "call for getDistricts");
+                    Log.d("postForManuel", "call for getDistricts");
                     try {
                         return getDictricts(params[0].getString("Country"), params[0].getString("State"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    Log.d("doInBackground", "call for getPrayerTimes");
+                    Log.d("postForManuel", "call for getPrayerTimes");
                     try {
                         getPrayerTimes(params[0].getString("Country"), params[0].getString("State"), "");
                         return null;
@@ -197,7 +343,7 @@ public class DataReceiver {
                     }
                 }
             } else if (params[0].length() == 3) {
-                Log.d("doInBackground", "call for getPrayerTimes");
+                Log.d("postForManuel", "call for getPrayerTimes");
                 try {
                     getPrayerTimes(params[0].getString("Country"), params[0].getString("State"), params[0].getString("District"));
                     return null;
@@ -215,177 +361,32 @@ public class DataReceiver {
             progressBar.setVisibility(View.INVISIBLE);
             progressText.setVisibility(View.INVISIBLE);
             if (parameters.length() == 0) {
-                Log.d("onPostExecute", "Countries are listing..");
+                Log.d("postForManuel", "Countries are listing..");
                 countries_list = json_list;
                 activity.fillListView(activity.json2List(json_list));
             } else if (parameters.length() == 1) {
-                Log.d("onPostExecute", "States are listing..");
+                Log.d("postForManuel", "States are listing..");
                 states_list = json_list;
                 activity.fillListView(activity.json2List(json_list));
             } else if (parameters.length() == 2) {
                 if (activity.secilenUlke) {
-                    Log.d("onPostExecute", "Districts are listing..");
+                    Log.d("postForManuel", "Districts are listing..");
                     districts_list = json_list;
                     activity.fillListView(activity.json2List(json_list));
                 } else {
-                    Log.d("onPostExecute", "Times received..");
+                    Log.d("postForManuel", "Times received..");
                     activity.startMainAct();
                 }
             } else if (parameters.length() == 3) {
-                Log.d("onPostExecute", "Times received..");
+                Log.d("postForManuel", "Times received..");
                 activity.startMainAct();
-            }
-
-        }
-
-        private JSONObject getCountries() {
-            Log.d("ASYNC", "getCuontries() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            //List<Map.Entry<String, Integer>> pairList = new ArrayList<>();
-            try {
-
-                doc = Jsoup.connect(url)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
-
-                for (Element opt : doc.select("span").get(12).child(0).children()) {
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-            //return pairList;
-        }
-
-        private JSONObject getStates(String country_value) {
-            Log.d("ASYNC", "getStates() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            //List<Map.Entry<String, Integer>> pairList = new ArrayList<>();
-            try {
-
-                doc = Jsoup.connect(url)
-                        .data("Country", country_value)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
-
-                for (Element opt : doc.select("span").get(14).child(0).children()) {
-                    if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
-                        continue;
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-        }
-
-        private JSONObject getDictricts(String country_value, String state_value) {
-            Log.d("ASYNC", "getDistricts() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            //List<Map.Entry<String, Integer>> pairList = new ArrayList<>();
-            try {
-
-                doc = Jsoup.connect(url)
-                        .data("Country", country_value)
-                        .data("State", state_value)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
-
-                for (Element opt : doc.select("span").get(16).child(0).children()) {
-                    if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
-                        continue;
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-            //return pairList;
-        }
-
-        private void getPrayerTimes(String country_value, String state_value, String district_value) {
-            Log.d("ASYNC", "getPrayerTimes() starting..");
-            String period_value = "Haftalik";
-            org.jsoup.nodes.Document doc = null;
-            List<List<String>> listOfList = new ArrayList<>();
-            try {
-
-                if (district_value.equals("") || district_value == null) {
-                    doc = Jsoup.connect(url)
-                            .data("Country", country_value)
-                            .data("State", state_value)
-                            .data("period", period_value)
-                            .userAgent("Mozilla")
-                            .timeout(10 * 1000)
-                            .post();
-                } else {
-                    doc = Jsoup.connect(url)
-                            .data("Country", country_value)
-                            .data("State", state_value)
-                            .data("City", district_value)
-                            .data("period", period_value)
-                            .userAgent("Mozilla")
-                            .timeout(10 * 1000)
-                            .post();
-                }
-
-                List<String> gun;
-                for (Element tr : doc.select("tbody").first().children()) {
-                    gun = new ArrayList<>();
-                    for (Element td : tr.select("td")) {
-                        if (td.text() != "")
-                            gun.add(td.text());
-                    }
-                    listOfList.add(gun);
-                }
-
-                for (List<String> l : listOfList) {
-                    if (l.size() != 0) {
-                        for (String s : l) {
-                            //System.out.println(s);
-                            SaveData.writeToFile(activity.getApplicationContext(), s + "\n");
-                        }
-                        SaveData.writeToFile(activity.getApplicationContext(), "----------------------\n");
-                        //System.out.println("-----------------------");
-                    }
-                }
-
-                SaveData.writeToFile(activity.getApplicationContext(), getDistrictNameById(district_value) + ":" + district_value + "\n");
-                SaveData.writeToFile(activity.getApplicationContext(), getStateNameById(state_value) + ":" + state_value + "\n");
-                SaveData.writeToFile(activity.getApplicationContext(), getCountryNameById(country_value) + ":" + country_value + "\n");
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
         }
 
     }
 
-    public class postForGps extends AsyncTask<JSONObject, Void, JSONObject>{
+    public class postForGps extends AsyncTask<JSONObject, Void, JSONObject> {
 
         @Override
         protected void onPreExecute() {
@@ -398,10 +399,10 @@ public class DataReceiver {
         @Override
         protected JSONObject doInBackground(JSONObject... params) {
             if (params[0].length() == 0) {
-                Log.d("doInBackground", "call for getCountries");
+                Log.d("postForGps", "call for getCountries");
                 return getCountries();
             } else if (params[0].length() == 1) {
-                Log.d("doInBackground", "call for getStates");
+                Log.d("postForGps", "call for getStates");
                 try {
                     return getStates(params[0].getString("Country"));
                 } catch (JSONException e) {
@@ -409,14 +410,14 @@ public class DataReceiver {
                 }
             } else if (params[0].length() == 2) {
                 if (secilen) {
-                    Log.d("doInBackground", "call for getDistricts");
+                    Log.d("postForGps", "call for getDistricts");
                     try {
                         return getDictricts(params[0].getString("Country"), params[0].getString("State"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    Log.d("doInBackground", "call for getPrayerTimes");
+                    Log.d("postForGps", "call for getPrayerTimes");
                     try {
                         getPrayerTimes(params[0].getString("Country"), params[0].getString("State"), "");
                         return null;
@@ -425,7 +426,7 @@ public class DataReceiver {
                     }
                 }
             } else if (params[0].length() == 3) {
-                Log.d("doInBackground", "call for getPrayerTimes");
+                Log.d("postForGps", "call for getPrayerTimes");
                 try {
                     getPrayerTimes(params[0].getString("Country"), params[0].getString("State"), params[0].getString("District"));
                     return null;
@@ -441,153 +442,95 @@ public class DataReceiver {
         protected void onPostExecute(JSONObject json_list) {
             super.onPostExecute(json_list);
             progressBar.setVisibility(View.INVISIBLE);
-            progressText.setVisibility(View.INVISIBLE);
-            if (par.length() == 0) {
-                Log.d("onPostExecute", "Countries are listing..");
+            //progressText.setVisibility(View.INVISIBLE);
+            if (parameters.length() == 0) {
+                Log.d("postForGps", "Countries are listing..");
                 countries_list = json_list;
                 try {
                     String id = getCountryIdByName(parameters.getString("Country"));
-                    if(id.equals("2") || id.equals("33") || id.equals("52"))
+                    if (id.equals("2") || id.equals("33") || id.equals("52"))
                         secilen = true;
-                    par.put("Country", id);
-                    new postForGps().execute(par);
+                    parameters.put("Country", id);
+                    new postForGps().execute(parameters);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (par.length() == 1) {
-                Log.d("onPostExecute", "States are listing..");
+            } else if (parameters.length() == 1) {
+                Log.d("postForGps", "States are listing..");
                 states_list = json_list;
                 try {
                     String id = getStateIdByName(parameters.getString("State"));
-                    par.put("State", id);
-                    new postForGps().execute(par);
+                    parameters.put("State", id);
+                    new postForGps().execute(parameters);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (par.length() == 2) {
+            } else if (parameters.length() == 2) {
                 if (secilen) {
-                    Log.d("onPostExecute", "Districts are listing..");
+                    Log.d("postForGps", "Districts are listing..");
                     districts_list = json_list;
                     try {
                         String id = getDistrictIdByName(parameters.getString("District"));
-                        if(id.equals("")){
+                        if (id.equals("")) {
                             id = getDistrictIdByName(parameters.getString("State"));
                         }
-                        par.put("District", id);
-                        new postForGps().execute(par);
+                        parameters.put("District", id);
+                        new postForGps().execute(parameters);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    Log.d("onPostExecute", "Times received..");
+                    Log.d("postForGps", "Times received..");
                     startMainAct();
                 }
-            } else if (par.length() == 3) {
-                Log.d("onPostExecute", "Times received..");
+            } else if (parameters.length() == 3) {
+                Log.d("postForGps", "Times received..");
                 startMainAct();
             }
 
         }
 
-        private JSONObject getCountries() {
-            Log.d("ASYNC", "getCuontries() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            try {
+    }
 
-                doc = Jsoup.connect(url)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
+    public class postForBackGround extends AsyncTask<JSONObject, Void, JSONObject> {
 
-                for (Element opt : doc.select("span").get(12).child(0).children()) {
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
+        @Override
+        protected void onPreExecute() {
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-            //return pairList;
         }
 
-        private JSONObject getStates(String country_value) {
-            Log.d("ASYNC", "getStates() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            //List<Map.Entry<String, Integer>> pairList = new ArrayList<>();
+        @Override
+        protected JSONObject doInBackground(JSONObject... params) {
+            Log.d("postForBackGround", "call for getPrayerTimes");
             try {
-
-                doc = Jsoup.connect(url)
-                        .data("Country", country_value)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
-
-                for (Element opt : doc.select("span").get(14).child(0).children()) {
-                    if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
-                        continue;
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                this.getPrayerTimes(params[0].getString("Country"), params[0].getString("State"), params[0].getString("District"));
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            return ret;
+            return null;
         }
 
-        private JSONObject getDictricts(String country_value, String state_value) {
-            Log.d("ASYNC", "getDistricts() starting..");
-            org.jsoup.nodes.Document doc = null;
-            JSONObject ret = new JSONObject();
-            //List<Map.Entry<String, Integer>> pairList = new ArrayList<>();
-            try {
-
-                doc = Jsoup.connect(url)
-                        .data("Country", country_value)
-                        .data("State", state_value)
-                        .userAgent("Mozilla")
-                        .timeout(10 * 1000)
-                        .post();
-
-                for (Element opt : doc.select("span").get(16).child(0).children()) {
-                    if (opt.text() == "Seciniz" || opt.attr("value").toString() == "")
-                        continue;
-                    ret.put(opt.text(), opt.attr("value").toString());
-                    //pairList.add(new AbstractMap.SimpleEntry<String, Integer>(opt.text(), Integer.parseInt(opt.attr("value").toString())));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return ret;
-            //return pairList;
+        @Override
+        protected void onPostExecute(JSONObject json_list) {
+            super.onPostExecute(json_list);
+            Log.d("postForBackGround", "Times received..");
         }
 
         private void getPrayerTimes(String country_value, String state_value, String district_value) {
             Log.d("ASYNC", "getPrayerTimes() starting..");
-            String period_value = "Haftalik";
+            String period_value = "Aylik";
             org.jsoup.nodes.Document doc = null;
             List<List<String>> listOfList = new ArrayList<>();
             try {
 
-                if (district_value.equals("") || district_value == null) {
+                if (district_value.equals("") || district_value == null || district_value.equals("-1")) {
                     doc = Jsoup.connect(url)
                             .data("Country", country_value)
                             .data("State", state_value)
                             .data("period", period_value)
-                            .userAgent("Mozilla")
+                            .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                            .referrer("http://www.google.com")
                             .timeout(10 * 1000)
                             .post();
                 } else {
@@ -596,12 +539,11 @@ public class DataReceiver {
                             .data("State", state_value)
                             .data("City", district_value)
                             .data("period", period_value)
-                            .userAgent("Mozilla")
+                            .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                            .referrer("http://www.google.com")
                             .timeout(10 * 1000)
                             .post();
                 }
-
-                //System.out.println(doc);
 
                 List<String> gun;
                 for (Element tr : doc.select("tbody").first().children()) {
@@ -613,24 +555,40 @@ public class DataReceiver {
                     listOfList.add(gun);
                 }
 
-                for (List<String> l : listOfList) {
-                    if (l.size() != 0) {
-                        for (String s : l) {
-                            //System.out.println(s);
-                            SaveData.writeToFile(context, s + "\n");
-                        }
-                        SaveData.writeToFile(context, "----------------------\n");
-                        //System.out.println("-----------------------");
-                    }
-                }
-
-                SaveData.writeToFile(context, getDistrictNameById(district_value) + ":" + district_value + "\n");
-                SaveData.writeToFile(context. getApplicationContext(), getStateNameById(state_value) + ":" + state_value + "\n");
-                SaveData.writeToFile(context. getApplicationContext(), getCountryNameById(country_value) + ":" + country_value + "\n");
+                checkForUpdate(listOfList);
 
 
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+
+        }
+
+        private void checkForUpdate(List<List<String>> listOfList){
+            List<String> data = new ArrayList<>(SaveData.readFromFile(context));
+            Map<String, List<String>> timesOfDays = new HashMap<>();
+
+            List<String> temp = new ArrayList<>();
+            for (int i = 3; i < data.size(); i++) {
+                if (((i-3) + 9) % 9 == 0) {
+                    for (int j = 1; j <= 7; j++)
+                        temp.add(data.get(i + j));
+                    timesOfDays.put(data.get(i), new ArrayList<String>(temp));
+                    temp.clear();
+                }
+            }
+
+            for (List<String> l : listOfList) {
+                if (l.size() != 0 && !timesOfDays.containsKey(l.get(0))) {
+                    System.out.println(l.get(0) + " added to data");
+                    Toast.makeText(context, l.get(0) + " added to data", Toast.LENGTH_SHORT).show();
+                    for (String s : l) {
+                        SaveData.writeToFile(activity.getApplicationContext(), s + "\n");
+                    }
+                    SaveData.writeToFile(activity.getApplicationContext(), "----------------------\n");
+                } else if(l.size() != 0) {
+                    System.out.println(l.get(0) + " already in data");
+                }
             }
 
         }

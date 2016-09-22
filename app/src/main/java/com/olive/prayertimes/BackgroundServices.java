@@ -23,6 +23,8 @@ public class BackgroundServices extends Service {
     Handler handler;
     TimeUpdater timeUpdater;
 
+    String[] timesOfUpdate = {"03:00:00", "09:00:00", ""};
+
     @Override
     public void onCreate() {
         Log.d("BACKGROUND", "SERVICE CREATE");
@@ -90,7 +92,17 @@ public class BackgroundServices extends Service {
         public void run() {
       /* do what you need to do */
 
+            Log.d("Flag", String.valueOf(timeUpdater.flagUpdate));
+
+            if (!timeUpdater.flagUpdate && isOnline()){
+                Log.d("updateTime", timeUpdater.getCurrentDate() + " <=> " + timeUpdater.getCurrentTime());
+                timeUpdater.getStateInfo();
+                timeUpdater.receiveNewData();
+                timeUpdater.flagUpdate = true;
+            }
+
             if (timeUpdater.getCurrentTime().equals("00:00:00")) {
+                timeUpdater.flagUpdate = false;
                 timeUpdater.fillTimesOfDays();
             }
             timeUpdater.calcDiffInTime();
@@ -101,5 +113,18 @@ public class BackgroundServices extends Service {
             handler.postDelayed(this, 1000);
         }
     };
+
+    private Boolean isOnline() {
+        try {
+            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
+            int returnVal = p1.waitFor();
+            boolean reachable = (returnVal==0);
+            return reachable;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }

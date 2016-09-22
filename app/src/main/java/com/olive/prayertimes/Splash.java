@@ -37,20 +37,20 @@ public class Splash extends Activity {
 
         if (settings.getBoolean("my_first_time", true)) {
 
-            if(!hasPermissions(this, PERMISSIONS)){
+            /*if(!hasPermissions(this, PERMISSIONS)){
                 ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQ);
             } else{
                 System.out.println("All permission already has");
                 Toast.makeText(getApplicationContext(), "All permission already has", Toast.LENGTH_SHORT).show();
                 MyGeocoder geo = new MyGeocoder(this);
                 geo.GeoAddress();
-            }
+            }*/
 
 
             settings.edit().putBoolean("my_first_time", false).commit();
-            /*Intent first_time_act = new Intent(this, ManuelKurulum.class);
+            Intent first_time_act = new Intent(this, ManuelKurulum.class);
             startActivity(first_time_act);
-            finish();*/
+            finish();
 
         } else{
             Intent mainAct = new Intent(this, MainActivity.class);
